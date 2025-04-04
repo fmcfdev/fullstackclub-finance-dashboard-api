@@ -14,5 +14,11 @@ COPY . .
 # Expõe a porta usada pela sua API (ajuste se for diferente)
 EXPOSE 3000
 
+# GEra os tipo do Prisma com base no schema.Prisma
+RUN npx prisma generate
+
+# Sincroniza as migrations
+RUN npx prisma migrate deploy
+
 # Comando para iniciar a aplicação
 CMD ["npm", "start"]
