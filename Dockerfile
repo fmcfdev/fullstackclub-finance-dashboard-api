@@ -4,21 +4,18 @@ FROM node:18
 # Define o diretório de trabalho dentro do container
 WORKDIR /app
 
-# Copia os arquivos do projeto pro container
+# Copia os arquivos do projeto para o container
 COPY package*.json ./
 RUN npm install
 
 # Copia o restante do código
 COPY . .
 
-# Expõe a porta usada pela sua API (ajuste se for diferente)
+# Expõe a porta usada pela API (ajuste se for diferente)
 EXPOSE 3000
 
-# GEra os tipo do Prisma com base no schema.Prisma
+# Gera os tipos do Prisma com base no schema.prisma
 RUN npx prisma generate
 
-# Sincroniza as migrations
-RUN npx prisma migrate deploy
-
-# Comando para iniciar a aplicação
-CMD ["npm", "start"]
+# Comando para iniciar a aplicação e aplicar migrations
+CMD npx prisma migrate deploy && npm start
