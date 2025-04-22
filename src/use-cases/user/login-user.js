@@ -18,7 +18,7 @@ export class LoginUserUseCase {
         }
 
         // verificaremos se a senha recebida é válida
-        const isPasswordValid = this.passwordComparatorAdapter.execute(
+        const isPasswordValid = await this.passwordComparatorAdapter.execute(
             password,
             user.password,
         )
