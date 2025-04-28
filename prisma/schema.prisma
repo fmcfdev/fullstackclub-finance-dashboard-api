@@ -13,8 +13,8 @@ model User {
   last_name    String        @db.VarChar(50)
   email        String        @unique @db.VarChar(100)
   password     String        @db.VarChar(100)
-  provider     String? 
-  providerId   String? 
+  provider     String?       @db.VarChar(50)
+  providerId   String?       @db.VarChar(255)
   transactions Transaction[]
 }
 
