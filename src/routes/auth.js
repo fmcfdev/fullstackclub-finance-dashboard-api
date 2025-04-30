@@ -2,6 +2,7 @@ import express from 'express'
 import { supabase } from '../supabaseClient.js'
 import { prisma } from '../../prisma/prisma.js'
 import { TokensGeneratorAdapter } from '../adapters/tokens-generator.js'
+import { generateRandomPassword } from '../utils/passwordGenerator.js'
 
 const authRouter = express.Router()
 
@@ -11,7 +12,7 @@ authRouter.get('/login/:provider', async (req, res) => {
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-            redirectTo: `${process.env.API_URL}/api/auth/callback`,
+            redirectTo: `${process.env.FRONT_URL}/callback`,
         },
     })
 
@@ -25,8 +26,6 @@ authRouter.get('/login/:provider', async (req, res) => {
 
 authRouter.get('/callback', async (req, res) => {
     const { access_token } = req.query
-
-    console.log(req.query)
 
     if (!access_token) {
         console.error('Access token não fornecido')
@@ -43,24 +42,26 @@ authRouter.get('/callback', async (req, res) => {
     }
 
     const user = data.user
-
     try {
         const provider = user.app_metadata?.provider || 'unknown'
-
+        const [firstName, lastName = ''] = (
+            user.user_metadata.full_name || ''
+        ).split(' ')
+        const password = generateRandomPassword()
         const savedUser = await prisma.user.upsert({
             where: { email: user.email },
             update: {
-                first_name: user.user_metadata.full_name.split(' ')[0],
-                last_name: user.user_metadata.full_name.split(' ')[1],
+                first_name: firstName,
+                last_name: lastName,
                 provider,
                 providerId: user.id,
             },
             create: {
                 id: user.id,
                 email: user.email,
-                first_name: user.user_metadata.full_name.split(' ')[0],
-                last_name: user.user_metadata.full_name.split(' ')[1],
-                password: '',
+                first_name: firstName,
+                last_name: lastName,
+                password: password,
                 provider,
                 providerId: user.id,
             },
@@ -75,6 +76,7 @@ authRouter.get('/callback', async (req, res) => {
 
         return res.status(200).json({
             message: 'Usuário autenticado com sucesso',
+            user,
             tokens: {
                 accessToken,
                 refreshToken,
