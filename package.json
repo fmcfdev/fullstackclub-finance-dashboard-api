@@ -27,10 +27,11 @@
         "lint-staged": "^15.2.2",
         "prettier": "^3.2.5",
         "prisma": "^5.12.1",
-        "supertest": "^6.3.4"
+        "supertest": "^7.1.0"
     },
     "dependencies": {
         "@prisma/client": "^5.12.1",
+        "@supabase/supabase-js": "^2.49.4",
         "bcrypt": "^5.1.1",
         "cors": "^2.8.5",
         "dayjs": "^1.11.10",

@@ -1,4 +1,5 @@
 import { EmailAlreadyInUseError } from '../../errors/user.js'
+import { generateRandomPassword } from '../../utils/passwordGenerator.js'
 
 export class CreateUserUseCase {
     constructor(
@@ -25,9 +26,13 @@ export class CreateUserUseCase {
 
         const userId = this.idGeneratorAdapter.execute()
 
-        const hashedPassword = await this.passwordHasherAdapter.execute(
-            createUserParams.password,
-        )
+        const password =
+            createUserParams.provider && createUserParams.providerId
+                ? generateRandomPassword()
+                : createUserParams.password
+
+        const hashedPassword =
+            await this.passwordHasherAdapter.execute(password)
 
         const user = {
             ...createUserParams,
@@ -37,9 +42,15 @@ export class CreateUserUseCase {
 
         const createdUser = await this.createUserRepository.execute(user)
 
+        const { accessToken, refreshToken } =
+            this.tokensGeneratorAdapter.execute(userId)
+
         return {
             ...createdUser,
-            tokens: this.tokensGeneratorAdapter.execute(userId),
+            tokens: {
+                accessToken,
+                refreshToken,
+            },
         }
     }
 }
